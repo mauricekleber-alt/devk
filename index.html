@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kostenloser Versicherungs-Checkup | DEVK</title>
+  <meta name="description" content="Versicherungschaos? Kostenloser Online-Checkup in 30 Minuten – unverbindlich, ohne Fachchinesisch." />
+
+  <!-- META PIXEL: Code hier einfügen -->
+  <!-- GOOGLE ANALYTICS 4: Code hier einfügen -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --green:       #006B3F;
+      --green-hover: #005432;
+      --green-bg:    rgba(0,107,63,0.07);
+      --white:       #FFFFFF;
+      --surface:     #F8FAFC;
+      --text:        #1E293B;
+      --text-sub:    #64748B;
+      --icon:        #475569;
+      --border:      #E2E8F0;
+      --red-bg:      #FEF2F2;
+      --red:         #EF4444;
+      --shadow-sm:   0 1px 4px rgba(0,0,0,0.06);
+      --shadow-md:   0 4px 20px rgba(0,0,0,0.09);
+      --shadow-green:0 4px 20px rgba(0,107,63,0.28);
+      --radius:      16px;
+      --radius-sm:   8px;
+      --font:        'Inter', system-ui, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      font-family: var(--font);
+      color: var(--text);
+      background: var(--white);
+      height: 100dvh;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ============================================================
+       PROGRESS BAR
+    ============================================================ */
+    #progress-bar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 3px;
+      background: var(--green);
+      transition: width 0.5s cubic-bezier(0.22,1,0.36,1);
+      z-index: 999;
+    }
+
+    /* ============================================================
+       NAV
+    ============================================================ */
+    nav {
+      position: fixed;
+      top: 3px; left: 0; right: 0;
+      z-index: 200;
+      background: rgba(255,255,255,0.96);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      height: 56px;
+      display: flex;
+      align-items: center;
+    }
+    .nav-inner {
+      width: 100%;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-sub);
+    }
+    .nav-logo strong { color: var(--text); }
+    /* Schritt-Indikatoren oben */
+    .nav-steps {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .nav-step {
+      width: 28px; height: 4px;
+      border-radius: 100px;
+      background: var(--border);
+      transition: background 0.4s ease, width 0.3s ease;
+    }
+    .nav-step.done { background: var(--green); opacity: 0.4; }
+    .nav-step.active { background: var(--green); width: 40px; }
+    .nav-back {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-sub);
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--font);
+      transition: color 0.2s;
+      padding: 4px 0;
+    }
+    .nav-back:hover { color: var(--text); }
+    .nav-back svg { width: 14px; height: 14px; }
+    .nav-back.hidden { visibility: hidden; pointer-events: none; }
+
+    /* ============================================================
+       PAGES CONTAINER
+    ============================================================ */
+    #pages {
+      position: fixed;
+      top: 59px; left: 0; right: 0; bottom: 0;
+      overflow: hidden;
+    }
+
+    .page {
+      position: absolute;
+      inset: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 48px 24px 80px;
+      transform: translateX(100%);
+      opacity: 0;
+      transition: none;
+      pointer-events: none;
+      will-change: transform, opacity;
+    }
+    .page.active {
+      transform: translateX(0);
+      opacity: 1;
+      pointer-events: all;
+    }
+    .page.animating {
+      transition: transform 0.42s cubic-bezier(0.22,1,0.36,1), opacity 0.42s ease;
+    }
+    /* enter from right (forward) */
+    .page.enter-from-right { transform: translateX(100%); opacity: 0; }
+    /* enter from left (back) */
+    .page.enter-from-left  { transform: translateX(-100%); opacity: 0; }
+    /* exit to left (forward) */
+    .page.exit-to-left  { transform: translateX(-60px); opacity: 0; }
+    /* exit to right (back) */
+    .page.exit-to-right { transform: translateX(100%); opacity: 0; }
+
+    /* ============================================================
+       SHARED COMPONENTS
+    ============================================================ */
+    .page-inner {
+      width: 100%;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .page-inner-wide {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .section-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green);
+      background: var(--green-bg);
+      padding: 5px 12px;
+      border-radius: 100px;
+      margin-bottom: 14px;
+    }
+
+    h1 { font-size: clamp(1.75rem, 5vw, 2.8rem); font-weight: 800; line-height: 1.15; letter-spacing: -0.02em; }
+    h2 { font-size: clamp(1.5rem, 4vw, 2.1rem); font-weight: 700; line-height: 1.2; letter-spacing: -0.015em; }
+    h3 { font-size: 1rem; font-weight: 600; }
+
+    .sub-text {
+      font-size: 1rem;
+      color: var(--text-sub);
+      line-height: 1.7;
+      margin-top: 12px;
+    }
+
+    /* ============================================================
+       BUTTONS
+    ============================================================ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--green);
+      color: #fff;
+      font-family: var(--font);
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 15px 28px;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      box-shadow: var(--shadow-green);
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      white-space: nowrap;
+      width: 100%;
+      max-width: 420px;
+    }
+    .btn:hover { background: var(--green-hover); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,107,63,0.35); }
+    .btn:active { transform: translateY(0); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text-sub);
+      box-shadow: none;
+      border: 1.5px solid var(--border);
+      font-weight: 500;
+      font-size: 0.88rem;
+    }
+    .btn-outline:hover { background: var(--surface); transform: none; box-shadow: none; color: var(--text); }
+
+    .btn-back {
+      background: none;
+      color: var(--text-sub);
+      box-shadow: none;
+      border: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      padding: 8px 0;
+      font-family: var(--font);
+      transition: color 0.2s;
+      width: auto;
+      max-width: none;
+    }
+    .btn-back:hover { background: none; transform: none; box-shadow: none; color: var(--text); }
+    .btn-back svg { width: 14px; height: 14px; }
+
+    .cta-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-top: 28px;
+    }
+
+    /* ============================================================
+       TRUST BADGES
+    ============================================================ */
+    .trust-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-sub);
+      font-weight: 500;
+    }
+    .trust-item .dot {
+      width: 16px; height: 16px;
+      background: var(--green);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .trust-item .dot svg { width: 8px; height: 8px; stroke: #fff; }
+
+    /* ============================================================
+       PAGE 1 — HERO
+    ============================================================ */
+    #page-1 { background: var(--white); }
+    .hero-advisor {
+      width: 68px; height: 68px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem;
+      margin: 0 auto 20px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      /* BERATER-FOTO: <img src="foto.jpg" style="width:100%;height:100%;object-fit:cover;"> */
+    }
+    #page-1 .page-inner { text-align: center; }
+    #page-1 h1 { margin-bottom: 10px; }
+    .scroll-arrow {
+      margin-top: 40px;
+      display: flex; justify-content: center;
+    }
+    .bounce {
+      animation: bounce 1.6s ease-in-out infinite;
+      color: var(--border);
+    }
+    @keyframes bounce {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(6px); }
+    }
+
+    /* ============================================================
+       PAGE 2 — PROBLEM (Selectable Cards)
+    ============================================================ */
+    #page-2 { background: var(--surface); }
+    .select-hint {
+      font-size: 0.82rem;
+      color: var(--text-sub);
+      text-align: center;
+      margin-top: 6px;
+      margin-bottom: 20px;
+    }
+    .pain-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .pain-card {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 16px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pain-card:hover { border-color: rgba(0,107,63,0.4); box-shadow: var(--shadow-sm); transform: translateY(-1px); }
+    .pain-card.selected {
+      border-color: var(--green);
+      background: rgba(0,107,63,0.04);
+      box-shadow: 0 0 0 3px rgba(0,107,63,0.12);
+    }
+    .pain-card .check-box {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      flex-shrink: 0;
+      margin-top: 1px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .pain-card.selected .check-box {
+      background: var(--green);
+      border-color: var(--green);
+    }
+    .pain-card.selected .check-box::after {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #fff;
+      display: block;
+    }
+    .pain-card .pain-icon {
+      width: 34px; height: 34px;
+      background: var(--surface);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .pain-card .pain-icon svg { width: 17px; height: 17px; stroke: var(--icon); }
+    .pain-card p { font-size: 0.84rem; color: var(--text-sub); line-height: 1.5; }
+    .selection-count {
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--green);
+      font-weight: 600;
+      margin: 8px 0 0;
+      height: 18px;
+      transition: opacity 0.2s;
+    }
+
+    /* ============================================================
+       PAGE 3 — KONSEQUENZ
+    ============================================================ */
+    #page-3 { background: var(--white); }
+    .konsequenz-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .konsequenz-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 18px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      background: var(--white);
+    }
+    .k-icon {
+      flex-shrink: 0;
+      width: 40px; height: 40px;
+      background: var(--red-bg);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .k-icon svg { width: 20px; height: 20px; stroke: var(--red); }
+    .k-title { font-size: 0.88rem; font-weight: 600; margin-bottom: 4px; }
+    .k-amount { font-size: 1.2rem; font-weight: 800; color: var(--red); display: block; margin-bottom: 4px; }
+    .k-desc { font-size: 0.8rem; color: var(--text-sub); line-height: 1.5; }
+
+    /* ============================================================
+       PAGE 4 — LÖSUNG
+    ============================================================ */
+    #page-4 { background: var(--surface); }
+    .steps-col {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-bottom: 24px;
+    }
+    .step-row {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      position: relative;
+    }
+    .step-row:not(:last-child)::before {
+      content: '';
+      position: absolute;
+      left: 19px;
+      top: 48px;
+      bottom: -12px;
+      width: 2px;
+      background: var(--border);
+      z-index: 0;
+    }
+    .step-num {
+      width: 40px; height: 40px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background: var(--white);
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800;
+      font-size: 0.9rem;
+      color: var(--green);
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      z-index: 1;
+    }
+    .step-body { padding: 8px 0 28px; }
+    .step-body h3 { margin-bottom: 4px; }
+    .step-body p { font-size: 0.88rem; color: var(--text-sub); line-height: 1.55; }
+    .trust-box {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--green);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 18px 20px;
+      font-size: 0.88rem;
+      color: var(--text-sub);
+      line-height: 1.65;
+      margin-bottom: 24px;
+    }
+    .trust-box strong { color: var(--text); }
+
+    /* ============================================================
+       PAGE 5 — SOCIAL PROOF
+    ============================================================ */
+    #page-5 { background: var(--white); }
+    .rating-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .stars-big { font-size: 1.2rem; color: #F59E0B; }
+    .rating-label strong { font-size: 1rem; font-weight: 700; }
+    .rating-label span { font-size: 0.82rem; color: var(--text-sub); }
+    .testimonials-col { display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px; }
+    .testimonial {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .testimonial .stars { font-size: 0.85rem; color: #F59E0B; margin-bottom: 8px; }
+    .testimonial .quote { font-size: 0.9rem; color: var(--text); line-height: 1.65; margin-bottom: 12px; }
+    .testimonial .person { display: flex; align-items: center; gap: 10px; }
+    .person-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--green-bg); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: var(--green); flex-shrink: 0; }
+    .person-name { font-size: 0.82rem; font-weight: 600; }
+    .person-meta { font-size: 0.74rem; color: var(--text-sub); }
+    .proof-count { text-align: center; font-size: 0.85rem; color: var(--text-sub); }
+    .proof-count strong { color: var(--text); }
+
+    /* ============================================================
+       PAGE 6 — BERATER
+    ============================================================ */
+    #page-6 { background: var(--surface); }
+    .berater-layout {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      text-align: center;
+    }
+    .berater-photo {
+      width: 140px; height: 140px;
+      border-radius: 50%;
+      background: var(--white);
+      border: 3px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3.5rem;
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+      /* BERATER-FOTO: <img src="foto.jpg" style="width:100%;height:100%;object-fit:cover;"> */
+    }
+    .berater-text { font-size: 0.95rem; color: var(--text-sub); line-height: 1.75; }
+    .berater-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      background: var(--white);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: 0.84rem;
+      color: var(--text-sub);
+      text-align: left;
+      margin-top: 4px;
+    }
+    .berater-note svg { width: 15px; height: 15px; stroke: var(--green); flex-shrink: 0; margin-top: 2px; }
+
+    /* ============================================================
+       PAGE 7 — FAQ
+    ============================================================ */
+    #page-7 { background: var(--white); }
+    .faq-list { display: flex; flex-direction: column; margin-bottom: 28px; }
+    .faq-item { border-bottom: 1px solid var(--border); }
+    .faq-item:first-child { border-top: 1px solid var(--border); }
+    .faq-q {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 12px; padding: 18px 0;
+      cursor: pointer; font-size: 0.92rem; font-weight: 600;
+      color: var(--text); background: none; border: none;
+      width: 100%; text-align: left; font-family: var(--font);
+      transition: color 0.2s; user-select: none;
+    }
+    .faq-q:hover { color: var(--green); }
+    .faq-item.open .faq-q { color: var(--green); }
+    .faq-toggle {
+      flex-shrink: 0; width: 24px; height: 24px;
+      border-radius: 50%; border: 1.5px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.3s, background 0.2s, border-color 0.2s;
+    }
+    .faq-toggle svg { width: 12px; height: 12px; stroke: var(--icon); }
+    .faq-item.open .faq-toggle { transform: rotate(45deg); background: var(--green); border-color: var(--green); }
+    .faq-item.open .faq-toggle svg { stroke: #fff; }
+    .faq-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+    .faq-body-inner { padding-bottom: 18px; font-size: 0.88rem; color: var(--text-sub); line-height: 1.7; }
+
+    /* ============================================================
+       PAGE 8 — FINALER CTA + CALENDLY
+    ============================================================ */
+    #page-8 { background: var(--surface); }
+    #page-8 .page-inner { text-align: center; }
+    .urgency {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.8rem; font-weight: 600; color: #B45309;
+      background: #FFFBEB; border: 1px solid #FDE68A;
+      border-radius: 100px; padding: 5px 12px; margin: 12px auto 0;
+    }
+    .calendly-wrap {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin: 24px 0;
+    }
+    .calendly-placeholder {
+      min-height: 380px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 12px; color: var(--text-sub); font-size: 0.88rem; padding: 32px;
+    }
+    .calendly-placeholder svg { width: 36px; height: 36px; stroke: var(--border); }
+    .calendly-placeholder strong { color: var(--text); font-size: 0.95rem; }
+    .final-badges {
+      display: flex; justify-content: center;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .final-badge {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.82rem; color: var(--text-sub); font-weight: 500;
+    }
+    .final-badge svg { width: 14px; height: 14px; stroke: var(--green); }
+
+    /* ============================================================
+       MOBILE STICKY CTA (nur wenn sinnvoll)
+    ============================================================ */
+    #sticky-cta {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 300;
+      background: var(--green);
+      color: #fff; font-family: var(--font); font-weight: 600;
+      font-size: 0.95rem; padding: 14px 24px;
+      text-align: center; border: none; cursor: pointer;
+      box-shadow: 0 -4px 20px rgba(0,107,63,0.2);
+      transition: opacity 0.3s, transform 0.3s, background 0.2s;
+      opacity: 0; transform: translateY(100%);
+    }
+    #sticky-cta.show { opacity: 1; transform: translateY(0); }
+    #sticky-cta:hover { background: var(--green-hover); }
+    @media (max-width: 767px) { #sticky-cta { display: block; } }
+
+    /* ============================================================
+       RESPONSIVE
+    ============================================================ */
+    @media (max-width: 600px) {
+      .pain-grid { grid-template-columns: 1fr; }
+      .konsequenz-grid { grid-template-columns: 1fr; }
+      h1 { font-size: 1.65rem; }
+      h2 { font-size: 1.4rem; }
+      .page { padding: 32px 16px 72px; }
+    }
+    @media (max-width: 380px) {
+      h1 { font-size: 1.45rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Progress Bar -->
+<div id="progress-bar" style="width:12.5%"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <button class="nav-back hidden" id="nav-back" onclick="prevPage()" aria-label="Zurück">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Zurück
+    </button>
+    <div class="nav-steps" id="nav-steps" aria-label="Fortschritt"></div>
+    <!-- DEVK-LOGO: <img src="devk-logo.svg" alt="DEVK" height="22"> -->
+    <div class="nav-logo"><strong>DEVK</strong> Checkup</div>
+  </div>
+</nav>
+
+<!-- PAGES -->
+<div id="pages">
+
+  <!-- ======================================================
+       PAGE 1 — HERO
+  ====================================================== -->
+  <div class="page active" id="page-1">
+    <div class="page-inner">
+
+      <!-- BERATER-FOTO: Echtes Foto hier einfügen (400x400px, rund) -->
+      <div class="hero-advisor" aria-label="Foto Berater">👤</div>
+
+      <div class="section-tag">Kostenloser Online-Checkup</div>
+      <h1>Versicherungschaos?<br>Lass uns Ordnung reinbringen.</h1>
+      <p class="sub-text">Kostenloser Versicherungs-Checkup in 30 Min – online, unverbindlich, ohne Fachchinesisch.</p>
+
+      <div class="cta-stack">
+        <button class="btn" onclick="nextPage()" aria-label="Jetzt starten">
+          Jetzt Termin sichern – kostenlos
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+      </div>
+
+      <div class="trust-row">
+        <span class="trust-item"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>100% kostenlos</span>
+        <span class="trust-item"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Unverbindlich</span>
+        <span class="trust-item"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>In 30 Sek. gebucht</span>
+      </div>
+
+      <div class="scroll-arrow" aria-hidden="true">
+        <svg class="bounce" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================
+       PAGE 2 — PROBLEM (Multi-Select Cards)
+  ====================================================== -->
+  <div class="page" id="page-2">
+    <div class="page-inner-wide">
+
+      <div style="text-align:center; margin-bottom:8px;">
+        <div class="section-tag">Kurze Frage</div>
+        <h2>Kommt dir das bekannt vor?</h2>
+        <p class="select-hint">Wähle alles aus, was auf dich zutrifft (auch mehrere möglich)</p>
+      </div>
+
+      <div class="pain-grid" id="pain-grid">
+
+        <div class="pain-card" onclick="togglePain(this)" role="checkbox" aria-checked="false" tabindex="0">
+          <div class="check-box"></div>
+          <div class="pain-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
+          <p>„Ich hab irgendwo einen Ordner mit Versicherungspost – keine Ahnung was drinsteht."</p>
+        </div>
+
+        <div class="pain-card" onclick="togglePain(this)" role="checkbox" aria-checked="false" tabindex="0">
+          <div class="check-box"></div>
+          <div class="pain-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+          <p>„Ich zahle monatlich für Versicherungen, aber weiß nicht ob die noch passen."</p>
+        </div>
+
+        <div class="pain-card" onclick="togglePain(this)" role="checkbox" aria-checked="false" tabindex="0">
+          <div class="check-box"></div>
+          <div class="pain-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <p>„Ich schieb das Thema seit Monaten vor mir her."</p>
+        </div>
+
+        <div class="pain-card" onclick="togglePain(this)" role="checkbox" aria-checked="false" tabindex="0">
+          <div class="check-box"></div>
+          <div class="pain-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+          <p>„Wenn was passiert, weiß ich nicht ob ich überhaupt versichert bin."</p>
+        </div>
+
+        <div class="pain-card" onclick="togglePain(this)" role="checkbox" aria-checked="false" tabindex="0">
+          <div class="check-box"></div>
+          <div class="pain-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <p>„Meine Eltern haben das früher geregelt – jetzt muss ich das selbst machen."</p>
+        </div>
+
+        <div class="pain-card" onclick="togglePain(this)" role="checkbox" aria-checked="false" tabindex="0">
+          <div class="check-box"></div>
+          <div class="pain-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+          <p>„Ich will nicht über- oder unterversichert sein, weiß aber nicht was ich brauche."</p>
+        </div>
+
+      </div>
+      <div class="selection-count" id="selection-count"></div>
+
+      <div class="cta-stack">
+        <button class="btn" onclick="nextPage()" aria-label="Weiter">
+          Das kenne ich – weiter
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+        <button class="btn btn-outline" onclick="nextPage()">Nichts davon trifft zu</button>
+        <button class="btn-back" onclick="prevPage()" aria-label="Zurück">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Zurück
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================
+       PAGE 3 — KONSEQUENZ
+  ====================================================== -->
+  <div class="page" id="page-3">
+    <div class="page-inner">
+
+      <div class="section-tag">Wichtig zu wissen</div>
+      <h2>Was passiert, wenn du es weiter aufschiebst?</h2>
+      <p class="sub-text" style="margin-bottom:20px;">Kein Fear-Mongering – aber das kann jedem passieren. Und ist einfach zu vermeiden.</p>
+
+      <div class="konsequenz-grid">
+
+        <div class="konsequenz-card">
+          <div class="k-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <div>
+            <div class="k-title">Wasserschaden ohne Hausrat</div>
+            <span class="k-amount">3.000 €+</span>
+            <div class="k-desc">Rohrbruch im Bad – du zahlst alles selbst.</div>
+          </div>
+        </div>
+
+        <div class="konsequenz-card">
+          <div class="k-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+          <div>
+            <div class="k-title">Berufsunfähig mit 30 ohne BU</div>
+            <span class="k-amount">existenzbedrohend</span>
+            <div class="k-desc">Kein Einkommen. Kein Netz darunter.</div>
+          </div>
+        </div>
+
+        <div class="konsequenz-card">
+          <div class="k-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+          <div>
+            <div class="k-title">Unfall im Ausland</div>
+            <span class="k-amount">20.000 €+</span>
+            <div class="k-desc">Rücktransport aus dem Urlaub allein.</div>
+          </div>
+        </div>
+
+        <div class="konsequenz-card">
+          <div class="k-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+          <div>
+            <div class="k-title">Haftpflichtschaden ohne Police</div>
+            <span class="k-amount">50.000 €+</span>
+            <div class="k-desc">Lebenslange Haftung möglich.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="cta-stack">
+        <button class="btn" onclick="nextPage()" aria-label="Weiter zur Lösung">
+          Zeig mir die Lösung
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+        <button class="btn-back" onclick="prevPage()" aria-label="Zurück">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Zurück
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================
+       PAGE 4 — LÖSUNG
+  ====================================================== -->
+  <div class="page" id="page-4">
+    <div class="page-inner">
+
+      <div class="section-tag">So einfach geht's</div>
+      <h2>In 3 Schritten zum klaren Kopf</h2>
+
+      <div class="steps-col" style="margin-top:24px;">
+        <div class="step-row">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h3>Termin buchen</h3>
+            <p>Online, dauert keine 30 Sekunden. Wähle einfach einen freien Slot.</p>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h3>Kurzes Gespräch</h3>
+            <p>Ca. 30 Minuten per Video-Call. Entspannt, auf Augenhöhe, kein Fachchinesisch.</p>
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h3>Klarheit haben</h3>
+            <p>Überblick + ehrliche Empfehlung. Was du brauchst – und was nicht.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="trust-box">
+        „Kein Verkaufsdruck, kein Kleingedrucktes. Du bekommst einen ehrlichen Überblick."<br><br>
+        <strong>Übrigens:</strong> Wenn du gut aufgestellt bist, sagen wir dir das auch. Wir verdienen kein Geld damit, dir unnötige Versicherungen zu verkaufen.
+      </div>
+
+      <div class="cta-stack">
+        <button class="btn" onclick="nextPage()" aria-label="Weiter">
+          Klingt gut – weiter
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+        <button class="btn-back" onclick="prevPage()" aria-label="Zurück">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Zurück
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================
+       PAGE 5 — SOCIAL PROOF
+  ====================================================== -->
+  <div class="page" id="page-5">
+    <div class="page-inner">
+
+      <div class="section-tag">Kundenstimmen</div>
+      <h2>Das sagen andere nach ihrem Checkup</h2>
+
+      <div class="rating-row" style="margin-top:16px;">
+        <div class="stars-big" aria-label="5 Sterne">★★★★★</div>
+        <div class="rating-label">
+          <strong>5,0</strong>
+          <span>  Google-Bewertung</span>
+          <!-- BEWERTUNGSANZAHL: z.B. " (48)" eintragen -->
+        </div>
+      </div>
+
+      <div class="testimonials-col">
+        <div class="testimonial">
+          <div class="stars">★★★★★</div>
+          <p class="quote">„Ich dachte Versicherungen sind mega kompliziert. Max hat mir in 30 Minuten alles erklärt. Jetzt weiß ich endlich, was ich habe und was mir fehlt."</p>
+          <div class="person">
+            <div class="person-avatar">LM</div>
+            <div><div class="person-name">Laura M.</div><div class="person-meta">27 Jahre</div></div>
+          </div>
+        </div>
+        <div class="testimonial">
+          <div class="stars">★★★★★</div>
+          <p class="quote">„Hab jahrelang zu viel gezahlt und hatte trotzdem Lücken. Hätte ich mal früher einen Checkup gemacht."</p>
+          <div class="person">
+            <div class="person-avatar">TK</div>
+            <div><div class="person-name">Tim K.</div><div class="person-meta">34 Jahre</div></div>
+          </div>
+        </div>
+        <div class="testimonial">
+          <div class="stars">★★★★★</div>
+          <p class="quote">„Endlich jemand, der nicht in Versicherungsdeutsch redet. Super sympathisch und ehrlich."</p>
+          <div class="person">
+            <div class="person-avatar">SW</div>
+            <div><div class="person-name">Sarah W.</div><div class="person-meta">22 Jahre</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ANZAHL: Aktualisieren -->
+      <p class="proof-count">Bereits <strong>500+ Checkups</strong> durchgeführt.</p>
+
+      <div class="cta-stack">
+        <button class="btn" onclick="nextPage()" aria-label="Weiter">
+          Weiter
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+        <button class="btn-back" onclick="prevPage()" aria-label="Zurück">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Zurück
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================
+       PAGE 6 — BERATER
+  ====================================================== -->
+  <div class="page" id="page-6">
+    <div class="page-inner">
+
+      <div style="text-align:center; margin-bottom:20px;">
+        <div class="section-tag">Dein Ansprechpartner</div>
+        <h2>Wer sitzt am anderen Ende des Video-Calls?</h2>
+      </div>
+
+      <div class="berater-layout">
+        <!-- BERATER-FOTO: <img src="foto.jpg" style="width:100%;height:100%;object-fit:cover;"> -->
+        <div class="berater-photo" aria-label="Foto Berater">👤</div>
+
+        <!-- NAME & TEXT: Anpassen -->
+        <div>
+          <h3 style="font-size:1.2rem; margin-bottom:8px;">[Vorname Nachname]</h3>
+          <p class="berater-text">
+            Ich und mein Team beraten seit <strong>[X] Jahren</strong> Menschen, die genau da stehen, wo du jetzt stehst. Online, auf Augenhöhe – ohne Versicherungs-Fachchinesisch.
+          </p>
+          <!-- PERSÖNLICHE NOTE: Anpassen -->
+          <p class="berater-text" style="margin-top:8px;">[Persönliche Note: z.B. lokaler Bezug, Motivation, kurze persönliche Geschichte]</p>
+        </div>
+
+        <div class="berater-note" style="width:100%;">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12A19.79 19.79 0 0 1 1.61 3.42 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.56a16 16 0 0 0 6.53 6.53l.87-.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          Kein Callcenter, keine Anonymität – du weißt, mit wem du sprichst.
+          <!-- VIDEO: <video src="video.mp4" width="100%" controls muted playsinline style="border-radius:10px;margin-top:12px;"></video> -->
+        </div>
+      </div>
+
+      <div class="cta-stack">
+        <button class="btn" onclick="nextPage()" aria-label="Weiter zu den häufigen Fragen">
+          Weiter
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+        <button class="btn-back" onclick="prevPage()" aria-label="Zurück">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Zurück
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================
+       PAGE 7 — FAQ
+  ====================================================== -->
+  <div class="page" id="page-7">
+    <div class="page-inner">
+
+      <div class="section-tag">FAQ</div>
+      <h2>Deine Fragen – unsere Antworten</h2>
+
+      <div class="faq-list" style="margin-top:20px;">
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">
+            Ist das wirklich kostenlos?
+            <span class="faq-toggle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+          </button>
+          <div class="faq-body"><div class="faq-body-inner">Ja, komplett. Der Checkup ist ein Service unserer Beratung. Keine Kosten, keine Verpflichtungen.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">
+            Wird mir dann was verkauft?
+            <span class="faq-toggle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+          </button>
+          <div class="faq-body"><div class="faq-body-inner">Wir geben dir einen ehrlichen Überblick. Wenn du gut aufgestellt bist, sagen wir dir das. Wenn Handlungsbedarf besteht, zeigen wir Optionen – ohne Druck.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">
+            Ich hab gar keine Ahnung von Versicherungen – ist das schlimm?
+            <span class="faq-toggle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+          </button>
+          <div class="faq-body"><div class="faq-body-inner">Perfekt, dafür gibt es uns. Wir erklären alles so, dass du es wirklich verstehst.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">
+            Wie läuft das ab?
+            <span class="faq-toggle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+          </button>
+          <div class="faq-body"><div class="faq-body-inner">Du buchst einen Termin, wir treffen uns per Video (ca. 30 Min.). Wir gehen gemeinsam durch, was du hast und was du brauchst.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">
+            Brauche ich Unterlagen?
+            <span class="faq-toggle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+          </button>
+          <div class="faq-body"><div class="faq-body-inner">Nein. Wenn du deinen Versicherungsordner zur Hand hast – umso besser. Aber kein Muss.</div></div>
+        </div>
+      </div>
+
+      <div class="cta-stack">
+        <button class="btn" onclick="nextPage()" aria-label="Zum Termin buchen">
+          Alles klar – jetzt Termin buchen
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+        <button class="btn-back" onclick="prevPage()" aria-label="Zurück">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Zurück
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================
+       PAGE 8 — FINALER CTA + CALENDLY
+  ====================================================== -->
+  <div class="page" id="page-8">
+    <div class="page-inner">
+      <div style="text-align:center;">
+        <div class="section-tag">Fast geschafft 🎉</div>
+        <h2>Wähle deinen Wunschtermin</h2>
+        <p class="sub-text">Dauert nur 30 Sekunden. Kostenlos & unverbindlich.</p>
+        <!-- URGENCY: Slots anpassen -->
+        <div class="urgency">⏱ Diese Woche noch 5 freie Termine</div>
+      </div>
+
+      <!--
+        CALENDLY INLINE WIDGET:
+        1. Aktiviere das Calendly-Script unten (Kommentar entfernen)
+        2. Ersetze 'DEIN-CALENDLY-LINK' mit deiner echten URL
+           z.B. https://calendly.com/dein-name/checkup?primary_color=006B3F&hide_gdpr_banner=1
+        3. Stelle das "Scheduled"-Event in Calendly als Meta Pixel Custom Conversion ein
+      -->
+      <div class="calendly-wrap">
+        <!--
+        <div class="calendly-inline-widget"
+             data-url="https://calendly.com/DEIN-CALENDLY-LINK?primary_color=006B3F&hide_gdpr_banner=1"
+             style="min-width:320px;height:580px;">
+        </div>
+        -->
+        <div class="calendly-placeholder">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <strong>Calendly-Widget hier einbetten</strong>
+          <span>Den Platzhalter-Kommentar oben aktivieren<br>und DEIN-CALENDLY-LINK ersetzen</span>
+        </div>
+      </div>
+
+      <div class="final-badges" style="margin-top:16px;">
+        <span class="final-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>30 Minuten</span>
+        <span class="final-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Online</span>
+        <span class="final-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>100% kostenlos</span>
+        <span class="final-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Kein Verkaufsdruck</span>
+      </div>
+
+      <div style="text-align:center; margin-top:16px;">
+        <button class="btn-back" onclick="prevPage()" aria-label="Zurück" style="margin:0 auto;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Zurück
+        </button>
+      </div>
+
+      <!-- DEVK-LOGO: <img src="devk-logo.svg" alt="DEVK" height="20" style="display:block;margin:20px auto 0;opacity:0.5;"> -->
+      <!-- IMPRESSUM/DATENSCHUTZ: Links eintragen -->
+      <div style="text-align:center; margin-top:24px; font-size:0.76rem; color:var(--text-sub);">
+        <a href="/impressum" style="color:var(--text-sub); margin:0 8px;">Impressum</a>
+        <a href="/datenschutz" style="color:var(--text-sub); margin:0 8px;">Datenschutz</a>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /pages -->
+
+<!-- Sticky Mobile CTA (erscheint ab Seite 2) -->
+<button id="sticky-cta" onclick="goToPage(8)" aria-label="Termin buchen">
+  Termin buchen – kostenlos →
+</button>
+
+<!-- CALENDLY SCRIPT: Aktivieren wenn Widget eingebettet wird -->
+<!--
+<link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+<script src="https://assets.calendly.com/assets/external/widget.js" async></script>
+-->
+
+<script>
+  /* ============================================================
+     STATE
+  ============================================================ */
+  const TOTAL_PAGES = 8;
+  let currentPage = 1;
+
+  /* ============================================================
+     INIT
+  ============================================================ */
+  function init() {
+    buildNavSteps();
+    updateNav();
+  }
+
+  /* ============================================================
+     BUILD NAV STEP DOTS
+  ============================================================ */
+  function buildNavSteps() {
+    const container = document.getElementById('nav-steps');
+    container.innerHTML = '';
+    for (let i = 1; i <= TOTAL_PAGES; i++) {
+      const d = document.createElement('div');
+      d.className = 'nav-step' + (i === 1 ? ' active' : '');
+      d.id = 'nav-step-' + i;
+      d.setAttribute('aria-label', 'Schritt ' + i + ' von ' + TOTAL_PAGES);
+      container.appendChild(d);
+    }
+  }
+
+  /* ============================================================
+     NAVIGATE FORWARD
+  ============================================================ */
+  function nextPage() {
+    if (currentPage >= TOTAL_PAGES) return;
+    goToPage(currentPage + 1);
+  }
+
+  /* ============================================================
+     NAVIGATE BACK
+  ============================================================ */
+  function prevPage() {
+    if (currentPage <= 1) return;
+    goToPage(currentPage - 1, true);
+  }
+
+  /* ============================================================
+     GO TO SPECIFIC PAGE
+  ============================================================ */
+  function goToPage(target, isBack = false) {
+    if (target === currentPage || target < 1 || target > TOTAL_PAGES) return;
+
+    const leaving  = document.getElementById('page-' + currentPage);
+    const entering = document.getElementById('page-' + target);
+
+    entering.scrollTop = 0;
+
+    // 1. Position entering page instantly (no transition yet)
+    entering.classList.remove('animating', 'active', 'enter-from-right', 'enter-from-left', 'exit-to-left', 'exit-to-right');
+    entering.classList.add(isBack ? 'enter-from-left' : 'enter-from-right');
+
+    // 2. Force browser to register the starting position
+    entering.getBoundingClientRect();
+
+    // 3. Now enable transitions on both
+    leaving.classList.add('animating');
+    entering.classList.add('animating');
+
+    // 4. Trigger animations
+    entering.classList.remove('enter-from-right', 'enter-from-left');
+    entering.classList.add('active');
+
+    leaving.classList.remove('active');
+    leaving.classList.add(isBack ? 'exit-to-right' : 'exit-to-left');
+
+    // 5. Cleanup after animation
+    setTimeout(() => {
+      leaving.classList.remove('animating', 'exit-to-left', 'exit-to-right');
+      entering.classList.remove('animating');
+    }, 450);
+
+    currentPage = target;
+    updateNav();
+
+    /* META PIXEL: Schritt-Event */
+    /* if (typeof fbq !== 'undefined') fbq('trackCustom', 'FunnelStep', { step: currentPage }); */
+  }
+
+  /* ============================================================
+     UPDATE NAV UI
+  ============================================================ */
+  function updateNav() {
+    /* Progress bar */
+    const pct = (currentPage / TOTAL_PAGES) * 100;
+    document.getElementById('progress-bar').style.width = pct + '%';
+
+    /* Step dots */
+    for (let i = 1; i <= TOTAL_PAGES; i++) {
+      const dot = document.getElementById('nav-step-' + i);
+      dot.className = 'nav-step';
+      if (i < currentPage)  dot.classList.add('done');
+      if (i === currentPage) dot.classList.add('active');
+    }
+
+    /* Back button */
+    const backBtn = document.getElementById('nav-back');
+    if (currentPage === 1) {
+      backBtn.classList.add('hidden');
+    } else {
+      backBtn.classList.remove('hidden');
+    }
+
+    /* Sticky mobile CTA: hide on page 1 and 8 */
+    const sticky = document.getElementById('sticky-cta');
+    if (currentPage === 1 || currentPage === 8) {
+      sticky.classList.remove('show');
+    } else {
+      setTimeout(() => sticky.classList.add('show'), 600);
+    }
+  }
+
+  /* ============================================================
+     PAIN POINT TOGGLE (Page 2)
+  ============================================================ */
+  function togglePain(card) {
+    card.classList.toggle('selected');
+    const isSelected = card.classList.contains('selected');
+    card.setAttribute('aria-checked', String(isSelected));
+
+    const count = document.querySelectorAll('.pain-card.selected').length;
+    const counter = document.getElementById('selection-count');
+    counter.textContent = count > 0 ? count + ' ausgewählt' : '';
+  }
+
+  /* Keyboard support for pain cards */
+  document.querySelectorAll('.pain-card').forEach(card => {
+    card.addEventListener('keydown', (e) => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        togglePain(card);
+      }
+    });
+  });
+
+  /* ============================================================
+     FAQ ACCORDION
+  ============================================================ */
+  function toggleFaq(btn) {
+    const item = btn.closest('.faq-item');
+    const body = item.querySelector('.faq-body');
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(i => {
+      i.classList.remove('open');
+      i.querySelector('.faq-body').style.maxHeight = null;
+      i.querySelector('.faq-q').setAttribute('aria-expanded', 'false');
+    });
+    if (!isOpen) {
+      item.classList.add('open');
+      body.style.maxHeight = body.scrollHeight + 'px';
+      btn.setAttribute('aria-expanded', 'true');
+    }
+  }
+
+  /* ============================================================
+     INIT
+  ============================================================ */
+  init();
+</script>
+</body>
+</html>
