@@ -35,26 +35,25 @@
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { font-size: 16px; }
+    html { font-size: 16px; scroll-behavior: smooth; }
     body {
       font-family: var(--font);
       color: var(--text);
       background: var(--white);
-      height: 100dvh;
-      overflow: hidden;
       -webkit-font-smoothing: antialiased;
     }
 
     /* ============================================================
-       PROGRESS BAR
+       SCROLL PROGRESS BAR
     ============================================================ */
     #progress-bar {
       position: fixed;
       top: 0; left: 0;
       height: 3px;
       background: var(--green);
-      transition: width 0.5s cubic-bezier(0.22,1,0.36,1);
+      width: 0%;
       z-index: 999;
+      transition: width 0.1s linear;
     }
 
     /* ============================================================
@@ -86,94 +85,62 @@
       color: var(--text-sub);
     }
     .nav-logo strong { color: var(--text); }
-    /* Schritt-Indikatoren oben */
-    .nav-steps {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .nav-step {
-      width: 28px; height: 4px;
-      border-radius: 100px;
-      background: var(--border);
-      transition: background 0.4s ease, width 0.3s ease;
-    }
-    .nav-step.done { background: var(--green); opacity: 0.4; }
-    .nav-step.active { background: var(--green); width: 40px; }
-    .nav-back {
+    .nav-cta {
       font-size: 0.82rem;
-      font-weight: 500;
-      color: var(--text-sub);
-      background: none;
+      font-weight: 600;
+      color: var(--green);
+      background: var(--green-bg);
       border: none;
+      border-radius: 100px;
+      padding: 7px 16px;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 5px;
       font-family: var(--font);
-      transition: color 0.2s;
-      padding: 4px 0;
+      transition: background 0.2s, color 0.2s;
+      white-space: nowrap;
     }
-    .nav-back:hover { color: var(--text); }
-    .nav-back svg { width: 14px; height: 14px; }
-    .nav-back.hidden { visibility: hidden; pointer-events: none; }
+    .nav-cta:hover { background: var(--green); color: #fff; }
 
     /* ============================================================
-       PAGES CONTAINER
+       SECTIONS
     ============================================================ */
-    #pages {
-      position: fixed;
-      top: 59px; left: 0; right: 0; bottom: 0;
-      overflow: hidden;
+    .section {
+      width: 100%;
+      padding: 80px 24px 72px;
+    }
+    /* First section needs extra top padding for fixed nav */
+    .section:first-of-type {
+      padding-top: 100px;
     }
 
-    .page {
-      position: absolute;
-      inset: 0;
-      overflow-y: auto;
-      overflow-x: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding: 48px 24px 80px;
-      transform: translateX(100%);
-      opacity: 0;
-      transition: none;
-      pointer-events: none;
-      will-change: transform, opacity;
-    }
-    .page.active {
-      transform: translateX(0);
-      opacity: 1;
-      pointer-events: all;
-    }
-    .page.animating {
-      transition: transform 0.42s cubic-bezier(0.22,1,0.36,1), opacity 0.42s ease;
-    }
-    /* enter from right (forward) */
-    .page.enter-from-right { transform: translateX(100%); opacity: 0; }
-    /* enter from left (back) */
-    .page.enter-from-left  { transform: translateX(-100%); opacity: 0; }
-    /* exit to left (forward) */
-    .page.exit-to-left  { transform: translateX(-60px); opacity: 0; }
-    /* exit to right (back) */
-    .page.exit-to-right { transform: translateX(100%); opacity: 0; }
-
-    /* ============================================================
-       SHARED COMPONENTS
-    ============================================================ */
-    .page-inner {
+    .section-inner {
       width: 100%;
       max-width: 680px;
       margin: 0 auto;
     }
-    .page-inner-wide {
+    .section-inner-wide {
       width: 100%;
       max-width: 900px;
       margin: 0 auto;
     }
 
+    /* Alternating backgrounds matching original */
+    #sec-hero      { background: var(--white); }
+    #sec-problem   { background: var(--surface); }
+    #sec-konsequenz{ background: var(--white); }
+    #sec-loesung   { background: var(--surface); }
+    #sec-proof     { background: var(--white); }
+    #sec-berater   { background: var(--surface); }
+    #sec-faq       { background: var(--white); }
+    #sec-booking   { background: var(--surface); }
+
+    /* Section dividers */
+    .section + .section {
+      border-top: 1px solid var(--border);
+    }
+
+    /* ============================================================
+       SHARED COMPONENTS
+    ============================================================ */
     .section-tag {
       display: inline-flex;
       align-items: center;
@@ -236,26 +203,6 @@
     }
     .btn-outline:hover { background: var(--surface); transform: none; box-shadow: none; color: var(--text); }
 
-    .btn-back {
-      background: none;
-      color: var(--text-sub);
-      box-shadow: none;
-      border: none;
-      font-size: 0.85rem;
-      font-weight: 500;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      padding: 8px 0;
-      font-family: var(--font);
-      transition: color 0.2s;
-      width: auto;
-      max-width: none;
-    }
-    .btn-back:hover { background: none; transform: none; box-shadow: none; color: var(--text); }
-    .btn-back svg { width: 14px; height: 14px; }
-
     .cta-stack {
       display: flex;
       flex-direction: column;
@@ -292,9 +239,10 @@
     .trust-item .dot svg { width: 8px; height: 8px; stroke: #fff; }
 
     /* ============================================================
-       PAGE 1 — HERO
+       HERO
     ============================================================ */
-    #page-1 { background: var(--white); }
+    #sec-hero .section-inner { text-align: center; }
+    #sec-hero h1 { margin-bottom: 10px; }
     .hero-advisor {
       width: 68px; height: 68px;
       border-radius: 50%;
@@ -305,10 +253,7 @@
       margin: 0 auto 20px;
       box-shadow: var(--shadow-sm);
       overflow: hidden;
-      /* BERATER-FOTO: <img src="foto.jpg" style="width:100%;height:100%;object-fit:cover;"> */
     }
-    #page-1 .page-inner { text-align: center; }
-    #page-1 h1 { margin-bottom: 10px; }
     .scroll-arrow {
       margin-top: 40px;
       display: flex; justify-content: center;
@@ -323,9 +268,8 @@
     }
 
     /* ============================================================
-       PAGE 2 — PROBLEM (Selectable Cards)
+       PROBLEM (Selectable Cards)
     ============================================================ */
-    #page-2 { background: var(--surface); }
     .select-hint {
       font-size: 0.82rem;
       color: var(--text-sub);
@@ -394,13 +338,11 @@
       font-weight: 600;
       margin: 8px 0 0;
       height: 18px;
-      transition: opacity 0.2s;
     }
 
     /* ============================================================
-       PAGE 3 — KONSEQUENZ
+       KONSEQUENZ
     ============================================================ */
-    #page-3 { background: var(--white); }
     .konsequenz-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -429,9 +371,8 @@
     .k-desc { font-size: 0.8rem; color: var(--text-sub); line-height: 1.5; }
 
     /* ============================================================
-       PAGE 4 — LÖSUNG
+       LÖSUNG (3 Schritte)
     ============================================================ */
-    #page-4 { background: var(--surface); }
     .steps-col {
       display: flex;
       flex-direction: column;
@@ -485,9 +426,8 @@
     .trust-box strong { color: var(--text); }
 
     /* ============================================================
-       PAGE 5 — SOCIAL PROOF
+       SOCIAL PROOF
     ============================================================ */
-    #page-5 { background: var(--white); }
     .rating-row {
       display: flex;
       align-items: center;
@@ -514,9 +454,8 @@
     .proof-count strong { color: var(--text); }
 
     /* ============================================================
-       PAGE 6 — BERATER
+       BERATER
     ============================================================ */
-    #page-6 { background: var(--surface); }
     .berater-layout {
       display: flex;
       flex-direction: column;
@@ -533,7 +472,6 @@
       font-size: 3.5rem;
       box-shadow: var(--shadow-md);
       overflow: hidden;
-      /* BERATER-FOTO: <img src="foto.jpg" style="width:100%;height:100%;object-fit:cover;"> */
     }
     .berater-text { font-size: 0.95rem; color: var(--text-sub); line-height: 1.75; }
     .berater-note {
@@ -551,9 +489,8 @@
     .berater-note svg { width: 15px; height: 15px; stroke: var(--green); flex-shrink: 0; margin-top: 2px; }
 
     /* ============================================================
-       PAGE 7 — FAQ
+       FAQ
     ============================================================ */
-    #page-7 { background: var(--white); }
     .faq-list { display: flex; flex-direction: column; margin-bottom: 28px; }
     .faq-item { border-bottom: 1px solid var(--border); }
     .faq-item:first-child { border-top: 1px solid var(--border); }
@@ -580,10 +517,9 @@
     .faq-body-inner { padding-bottom: 18px; font-size: 0.88rem; color: var(--text-sub); line-height: 1.7; }
 
     /* ============================================================
-       PAGE 8 — FINALER CTA + CALENDLY
+       BOOKING (ehem. Page 8)
     ============================================================ */
-    #page-8 { background: var(--surface); }
-    #page-8 .page-inner { text-align: center; }
+    #sec-booking .section-inner { text-align: center; }
     .urgency {
       display: inline-flex; align-items: center; gap: 6px;
       font-size: 0.8rem; font-weight: 600; color: #B45309;
@@ -616,7 +552,7 @@
     .final-badge svg { width: 14px; height: 14px; stroke: var(--green); }
 
     /* ============================================================
-       MOBILE STICKY CTA (nur wenn sinnvoll)
+       MOBILE STICKY CTA
     ============================================================ */
     #sticky-cta {
       display: none;
@@ -643,481 +579,430 @@
       .konsequenz-grid { grid-template-columns: 1fr; }
       h1 { font-size: 1.65rem; }
       h2 { font-size: 1.4rem; }
-      .page { padding: 32px 16px 72px; }
+      .section { padding: 60px 16px 56px; }
+      .section:first-of-type { padding-top: 84px; }
     }
     @media (max-width: 380px) {
       h1 { font-size: 1.45rem; }
+    }
+
+    /* ============================================================
+       SCROLL REVEAL ANIMATION
+    ============================================================ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.22,1,0.36,1);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
     }
   </style>
 </head>
 <body>
 
-<!-- Progress Bar -->
-<div id="progress-bar" style="width:12.5%"></div>
+<!-- Scroll Progress Bar -->
+<div id="progress-bar"></div>
 
 <!-- NAV -->
 <nav>
   <div class="nav-inner">
-    <button class="nav-back hidden" id="nav-back" onclick="prevPage()" aria-label="Zurück">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-      Zurück
-    </button>
-    <div class="nav-steps" id="nav-steps" aria-label="Fortschritt"></div>
     <!-- DEVK-LOGO: <img src="devk-logo.svg" alt="DEVK" height="22"> -->
     <div class="nav-logo"><strong>DEVK</strong> Checkup</div>
+    <button class="nav-cta" onclick="scrollToBooking()" aria-label="Termin buchen">
+      Termin buchen →
+    </button>
   </div>
 </nav>
 
-<!-- PAGES -->
-<div id="pages">
+<!-- ======================================================
+     SECTION 1 — HERO
+====================================================== -->
+<section class="section" id="sec-hero">
+  <div class="section-inner">
 
-  <!-- ======================================================
-       PAGE 1 — HERO
-  ====================================================== -->
-  <div class="page active" id="page-1">
-    <div class="page-inner">
+    <!-- BERATER-FOTO: Echtes Foto hier einfügen (400x400px, rund) -->
+    <div class="hero-advisor" aria-label="Foto Berater">👤</div>
 
-      <!-- BERATER-FOTO: Echtes Foto hier einfügen (400x400px, rund) -->
-      <div class="hero-advisor" aria-label="Foto Berater">👤</div>
+    <div class="section-tag">Kostenloser Online-Checkup</div>
+    <h1>Versicherungschaos?<br>Lass uns Ordnung reinbringen.</h1>
+    <p class="sub-text">Kostenloser Versicherungs-Checkup in 30 Min – online, unverbindlich, ohne Fachchinesisch.</p>
 
-      <div class="section-tag">Kostenloser Online-Checkup</div>
-      <h1>Versicherungschaos?<br>Lass uns Ordnung reinbringen.</h1>
-      <p class="sub-text">Kostenloser Versicherungs-Checkup in 30 Min – online, unverbindlich, ohne Fachchinesisch.</p>
+    <div class="cta-stack">
+      <button class="btn" onclick="scrollToBooking()" aria-label="Jetzt Termin sichern">
+        Jetzt Termin sichern – kostenlos
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </div>
 
-      <div class="cta-stack">
-        <button class="btn" onclick="nextPage()" aria-label="Jetzt starten">
-          Jetzt Termin sichern – kostenlos
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </button>
+    <div class="trust-row">
+      <span class="trust-item"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>100% kostenlos</span>
+      <span class="trust-item"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Unverbindlich</span>
+      <span class="trust-item"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>In 30 Sek. gebucht</span>
+    </div>
+
+    <div class="scroll-arrow" aria-hidden="true">
+      <svg class="bounce" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+
+  </div>
+</section>
+
+<!-- ======================================================
+     SECTION 2 — PROBLEM (Multi-Select Cards)
+====================================================== -->
+<section class="section" id="sec-problem">
+  <div class="section-inner-wide">
+
+    <div style="text-align:center; margin-bottom:8px;" class="reveal">
+      <div class="section-tag">Kurze Frage</div>
+      <h2>Kommt dir das bekannt vor?</h2>
+      <p class="select-hint">Wähle alles aus, was auf dich zutrifft (auch mehrere möglich)</p>
+    </div>
+
+    <div class="pain-grid reveal" id="pain-grid">
+
+      <div class="pain-card" onclick="togglePain(this)" role="checkbox" aria-checked="false" tabindex="0">
+        <div class="check-box"></div>
+        <div class="pain-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
+        <p>„Ich hab irgendwo einen Ordner mit Versicherungspost – keine Ahnung was drinsteht."</p>
       </div>
 
-      <div class="trust-row">
-        <span class="trust-item"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>100% kostenlos</span>
-        <span class="trust-item"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Unverbindlich</span>
-        <span class="trust-item"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>In 30 Sek. gebucht</span>
+      <div class="pain-card" onclick="togglePain(this)" role="checkbox" aria-checked="false" tabindex="0">
+        <div class="check-box"></div>
+        <div class="pain-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+        <p>„Ich zahle monatlich für Versicherungen, aber weiß nicht ob die noch passen."</p>
       </div>
 
-      <div class="scroll-arrow" aria-hidden="true">
-        <svg class="bounce" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      <div class="pain-card" onclick="togglePain(this)" role="checkbox" aria-checked="false" tabindex="0">
+        <div class="check-box"></div>
+        <div class="pain-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <p>„Ich schieb das Thema seit Monaten vor mir her."</p>
+      </div>
+
+      <div class="pain-card" onclick="togglePain(this)" role="checkbox" aria-checked="false" tabindex="0">
+        <div class="check-box"></div>
+        <div class="pain-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <p>„Wenn was passiert, weiß ich nicht ob ich überhaupt versichert bin."</p>
+      </div>
+
+      <div class="pain-card" onclick="togglePain(this)" role="checkbox" aria-checked="false" tabindex="0">
+        <div class="check-box"></div>
+        <div class="pain-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <p>„Meine Eltern haben das früher geregelt – jetzt muss ich das selbst machen."</p>
+      </div>
+
+      <div class="pain-card" onclick="togglePain(this)" role="checkbox" aria-checked="false" tabindex="0">
+        <div class="check-box"></div>
+        <div class="pain-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+        <p>„Ich will nicht über- oder unterversichert sein, weiß aber nicht was ich brauche."</p>
       </div>
 
     </div>
+    <div class="selection-count" id="selection-count"></div>
+
   </div>
+</section>
 
-  <!-- ======================================================
-       PAGE 2 — PROBLEM (Multi-Select Cards)
-  ====================================================== -->
-  <div class="page" id="page-2">
-    <div class="page-inner-wide">
+<!-- ======================================================
+     SECTION 3 — KONSEQUENZ
+====================================================== -->
+<section class="section" id="sec-konsequenz">
+  <div class="section-inner">
 
-      <div style="text-align:center; margin-bottom:8px;">
-        <div class="section-tag">Kurze Frage</div>
-        <h2>Kommt dir das bekannt vor?</h2>
-        <p class="select-hint">Wähle alles aus, was auf dich zutrifft (auch mehrere möglich)</p>
-      </div>
-
-      <div class="pain-grid" id="pain-grid">
-
-        <div class="pain-card" onclick="togglePain(this)" role="checkbox" aria-checked="false" tabindex="0">
-          <div class="check-box"></div>
-          <div class="pain-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
-          <p>„Ich hab irgendwo einen Ordner mit Versicherungspost – keine Ahnung was drinsteht."</p>
-        </div>
-
-        <div class="pain-card" onclick="togglePain(this)" role="checkbox" aria-checked="false" tabindex="0">
-          <div class="check-box"></div>
-          <div class="pain-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
-          <p>„Ich zahle monatlich für Versicherungen, aber weiß nicht ob die noch passen."</p>
-        </div>
-
-        <div class="pain-card" onclick="togglePain(this)" role="checkbox" aria-checked="false" tabindex="0">
-          <div class="check-box"></div>
-          <div class="pain-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-          <p>„Ich schieb das Thema seit Monaten vor mir her."</p>
-        </div>
-
-        <div class="pain-card" onclick="togglePain(this)" role="checkbox" aria-checked="false" tabindex="0">
-          <div class="check-box"></div>
-          <div class="pain-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-          <p>„Wenn was passiert, weiß ich nicht ob ich überhaupt versichert bin."</p>
-        </div>
-
-        <div class="pain-card" onclick="togglePain(this)" role="checkbox" aria-checked="false" tabindex="0">
-          <div class="check-box"></div>
-          <div class="pain-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-          <p>„Meine Eltern haben das früher geregelt – jetzt muss ich das selbst machen."</p>
-        </div>
-
-        <div class="pain-card" onclick="togglePain(this)" role="checkbox" aria-checked="false" tabindex="0">
-          <div class="check-box"></div>
-          <div class="pain-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
-          <p>„Ich will nicht über- oder unterversichert sein, weiß aber nicht was ich brauche."</p>
-        </div>
-
-      </div>
-      <div class="selection-count" id="selection-count"></div>
-
-      <div class="cta-stack">
-        <button class="btn" onclick="nextPage()" aria-label="Weiter">
-          Das kenne ich – weiter
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </button>
-        <button class="btn btn-outline" onclick="nextPage()">Nichts davon trifft zu</button>
-        <button class="btn-back" onclick="prevPage()" aria-label="Zurück">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-          Zurück
-        </button>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ======================================================
-       PAGE 3 — KONSEQUENZ
-  ====================================================== -->
-  <div class="page" id="page-3">
-    <div class="page-inner">
-
+    <div class="reveal">
       <div class="section-tag">Wichtig zu wissen</div>
       <h2>Was passiert, wenn du es weiter aufschiebst?</h2>
       <p class="sub-text" style="margin-bottom:20px;">Kein Fear-Mongering – aber das kann jedem passieren. Und ist einfach zu vermeiden.</p>
+    </div>
 
-      <div class="konsequenz-grid">
+    <div class="konsequenz-grid reveal">
 
-        <div class="konsequenz-card">
-          <div class="k-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-          <div>
-            <div class="k-title">Wasserschaden ohne Hausrat</div>
-            <span class="k-amount">3.000 €+</span>
-            <div class="k-desc">Rohrbruch im Bad – du zahlst alles selbst.</div>
-          </div>
+      <div class="konsequenz-card">
+        <div class="k-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div>
+          <div class="k-title">Wasserschaden ohne Hausrat</div>
+          <span class="k-amount">3.000 €+</span>
+          <div class="k-desc">Rohrbruch im Bad – du zahlst alles selbst.</div>
         </div>
-
-        <div class="konsequenz-card">
-          <div class="k-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
-          <div>
-            <div class="k-title">Berufsunfähig mit 30 ohne BU</div>
-            <span class="k-amount">existenzbedrohend</span>
-            <div class="k-desc">Kein Einkommen. Kein Netz darunter.</div>
-          </div>
-        </div>
-
-        <div class="konsequenz-card">
-          <div class="k-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
-          <div>
-            <div class="k-title">Unfall im Ausland</div>
-            <span class="k-amount">20.000 €+</span>
-            <div class="k-desc">Rücktransport aus dem Urlaub allein.</div>
-          </div>
-        </div>
-
-        <div class="konsequenz-card">
-          <div class="k-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-          <div>
-            <div class="k-title">Haftpflichtschaden ohne Police</div>
-            <span class="k-amount">50.000 €+</span>
-            <div class="k-desc">Lebenslange Haftung möglich.</div>
-          </div>
-        </div>
-
       </div>
 
-      <div class="cta-stack">
-        <button class="btn" onclick="nextPage()" aria-label="Weiter zur Lösung">
-          Zeig mir die Lösung
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </button>
-        <button class="btn-back" onclick="prevPage()" aria-label="Zurück">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-          Zurück
-        </button>
+      <div class="konsequenz-card">
+        <div class="k-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+        <div>
+          <div class="k-title">Berufsunfähig mit 30 ohne BU</div>
+          <span class="k-amount">existenzbedrohend</span>
+          <div class="k-desc">Kein Einkommen. Kein Netz darunter.</div>
+        </div>
+      </div>
+
+      <div class="konsequenz-card">
+        <div class="k-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+        <div>
+          <div class="k-title">Unfall im Ausland</div>
+          <span class="k-amount">20.000 €+</span>
+          <div class="k-desc">Rücktransport aus dem Urlaub allein.</div>
+        </div>
+      </div>
+
+      <div class="konsequenz-card">
+        <div class="k-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div>
+          <div class="k-title">Haftpflichtschaden ohne Police</div>
+          <span class="k-amount">50.000 €+</span>
+          <div class="k-desc">Lebenslange Haftung möglich.</div>
+        </div>
       </div>
 
     </div>
+
   </div>
+</section>
 
-  <!-- ======================================================
-       PAGE 4 — LÖSUNG
-  ====================================================== -->
-  <div class="page" id="page-4">
-    <div class="page-inner">
+<!-- ======================================================
+     SECTION 4 — LÖSUNG (3 Schritte)
+====================================================== -->
+<section class="section" id="sec-loesung">
+  <div class="section-inner">
 
+    <div class="reveal">
       <div class="section-tag">So einfach geht's</div>
       <h2>In 3 Schritten zum klaren Kopf</h2>
-
-      <div class="steps-col" style="margin-top:24px;">
-        <div class="step-row">
-          <div class="step-num">1</div>
-          <div class="step-body">
-            <h3>Termin buchen</h3>
-            <p>Online, dauert keine 30 Sekunden. Wähle einfach einen freien Slot.</p>
-          </div>
-        </div>
-        <div class="step-row">
-          <div class="step-num">2</div>
-          <div class="step-body">
-            <h3>Kurzes Gespräch</h3>
-            <p>Ca. 30 Minuten per Video-Call. Entspannt, auf Augenhöhe, kein Fachchinesisch.</p>
-          </div>
-        </div>
-        <div class="step-row">
-          <div class="step-num">3</div>
-          <div class="step-body">
-            <h3>Klarheit haben</h3>
-            <p>Überblick + ehrliche Empfehlung. Was du brauchst – und was nicht.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="trust-box">
-        „Kein Verkaufsdruck, kein Kleingedrucktes. Du bekommst einen ehrlichen Überblick."<br><br>
-        <strong>Übrigens:</strong> Wenn du gut aufgestellt bist, sagen wir dir das auch. Wir verdienen kein Geld damit, dir unnötige Versicherungen zu verkaufen.
-      </div>
-
-      <div class="cta-stack">
-        <button class="btn" onclick="nextPage()" aria-label="Weiter">
-          Klingt gut – weiter
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </button>
-        <button class="btn-back" onclick="prevPage()" aria-label="Zurück">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-          Zurück
-        </button>
-      </div>
-
     </div>
+
+    <div class="steps-col reveal" style="margin-top:24px;">
+      <div class="step-row">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Termin buchen</h3>
+          <p>Online, dauert keine 30 Sekunden. Wähle einfach einen freien Slot.</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Kurzes Gespräch</h3>
+          <p>Ca. 30 Minuten per Video-Call. Entspannt, auf Augenhöhe, kein Fachchinesisch.</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Klarheit haben</h3>
+          <p>Überblick + ehrliche Empfehlung. Was du brauchst – und was nicht.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="trust-box reveal">
+      „Kein Verkaufsdruck, kein Kleingedrucktes. Du bekommst einen ehrlichen Überblick."<br><br>
+      <strong>Übrigens:</strong> Wenn du gut aufgestellt bist, sagen wir dir das auch. Wir verdienen kein Geld damit, dir unnötige Versicherungen zu verkaufen.
+    </div>
+
+    <!-- Zweiter CTA nach den 3 Schritten -->
+    <div class="cta-stack reveal">
+      <button class="btn" onclick="scrollToBooking()" aria-label="Jetzt Termin sichern">
+        Jetzt Termin sichern – kostenlos
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </div>
+
   </div>
+</section>
 
-  <!-- ======================================================
-       PAGE 5 — SOCIAL PROOF
-  ====================================================== -->
-  <div class="page" id="page-5">
-    <div class="page-inner">
+<!-- ======================================================
+     SECTION 5 — SOCIAL PROOF
+====================================================== -->
+<section class="section" id="sec-proof">
+  <div class="section-inner">
 
+    <div class="reveal">
       <div class="section-tag">Kundenstimmen</div>
       <h2>Das sagen andere nach ihrem Checkup</h2>
-
-      <div class="rating-row" style="margin-top:16px;">
-        <div class="stars-big" aria-label="5 Sterne">★★★★★</div>
-        <div class="rating-label">
-          <strong>5,0</strong>
-          <span>  Google-Bewertung</span>
-          <!-- BEWERTUNGSANZAHL: z.B. " (48)" eintragen -->
-        </div>
-      </div>
-
-      <div class="testimonials-col">
-        <div class="testimonial">
-          <div class="stars">★★★★★</div>
-          <p class="quote">„Ich dachte Versicherungen sind mega kompliziert. Max hat mir in 30 Minuten alles erklärt. Jetzt weiß ich endlich, was ich habe und was mir fehlt."</p>
-          <div class="person">
-            <div class="person-avatar">LM</div>
-            <div><div class="person-name">Laura M.</div><div class="person-meta">27 Jahre</div></div>
-          </div>
-        </div>
-        <div class="testimonial">
-          <div class="stars">★★★★★</div>
-          <p class="quote">„Hab jahrelang zu viel gezahlt und hatte trotzdem Lücken. Hätte ich mal früher einen Checkup gemacht."</p>
-          <div class="person">
-            <div class="person-avatar">TK</div>
-            <div><div class="person-name">Tim K.</div><div class="person-meta">34 Jahre</div></div>
-          </div>
-        </div>
-        <div class="testimonial">
-          <div class="stars">★★★★★</div>
-          <p class="quote">„Endlich jemand, der nicht in Versicherungsdeutsch redet. Super sympathisch und ehrlich."</p>
-          <div class="person">
-            <div class="person-avatar">SW</div>
-            <div><div class="person-name">Sarah W.</div><div class="person-meta">22 Jahre</div></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ANZAHL: Aktualisieren -->
-      <p class="proof-count">Bereits <strong>500+ Checkups</strong> durchgeführt.</p>
-
-      <div class="cta-stack">
-        <button class="btn" onclick="nextPage()" aria-label="Weiter">
-          Weiter
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </button>
-        <button class="btn-back" onclick="prevPage()" aria-label="Zurück">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-          Zurück
-        </button>
-      </div>
-
     </div>
-  </div>
 
-  <!-- ======================================================
-       PAGE 6 — BERATER
-  ====================================================== -->
-  <div class="page" id="page-6">
-    <div class="page-inner">
-
-      <div style="text-align:center; margin-bottom:20px;">
-        <div class="section-tag">Dein Ansprechpartner</div>
-        <h2>Wer sitzt am anderen Ende des Video-Calls?</h2>
+    <div class="rating-row reveal" style="margin-top:16px;">
+      <div class="stars-big" aria-label="5 Sterne">★★★★★</div>
+      <div class="rating-label">
+        <strong>5,0</strong>
+        <span>&nbsp;Google-Bewertung</span>
+        <!-- BEWERTUNGSANZAHL: z.B. " (48)" eintragen -->
       </div>
-
-      <div class="berater-layout">
-        <!-- BERATER-FOTO: <img src="foto.jpg" style="width:100%;height:100%;object-fit:cover;"> -->
-        <div class="berater-photo" aria-label="Foto Berater">👤</div>
-
-        <!-- NAME & TEXT: Anpassen -->
-        <div>
-          <h3 style="font-size:1.2rem; margin-bottom:8px;">[Vorname Nachname]</h3>
-          <p class="berater-text">
-            Ich und mein Team beraten seit <strong>[X] Jahren</strong> Menschen, die genau da stehen, wo du jetzt stehst. Online, auf Augenhöhe – ohne Versicherungs-Fachchinesisch.
-          </p>
-          <!-- PERSÖNLICHE NOTE: Anpassen -->
-          <p class="berater-text" style="margin-top:8px;">[Persönliche Note: z.B. lokaler Bezug, Motivation, kurze persönliche Geschichte]</p>
-        </div>
-
-        <div class="berater-note" style="width:100%;">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12A19.79 19.79 0 0 1 1.61 3.42 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.56a16 16 0 0 0 6.53 6.53l.87-.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-          Kein Callcenter, keine Anonymität – du weißt, mit wem du sprichst.
-          <!-- VIDEO: <video src="video.mp4" width="100%" controls muted playsinline style="border-radius:10px;margin-top:12px;"></video> -->
-        </div>
-      </div>
-
-      <div class="cta-stack">
-        <button class="btn" onclick="nextPage()" aria-label="Weiter zu den häufigen Fragen">
-          Weiter
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </button>
-        <button class="btn-back" onclick="prevPage()" aria-label="Zurück">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-          Zurück
-        </button>
-      </div>
-
     </div>
+
+    <div class="testimonials-col reveal">
+      <div class="testimonial">
+        <div class="stars">★★★★★</div>
+        <p class="quote">„Ich dachte Versicherungen sind mega kompliziert. Max hat mir in 30 Minuten alles erklärt. Jetzt weiß ich endlich, was ich habe und was mir fehlt."</p>
+        <div class="person">
+          <div class="person-avatar">LM</div>
+          <div><div class="person-name">Laura M.</div><div class="person-meta">27 Jahre</div></div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <div class="stars">★★★★★</div>
+        <p class="quote">„Hab jahrelang zu viel gezahlt und hatte trotzdem Lücken. Hätte ich mal früher einen Checkup gemacht."</p>
+        <div class="person">
+          <div class="person-avatar">TK</div>
+          <div><div class="person-name">Tim K.</div><div class="person-meta">34 Jahre</div></div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <div class="stars">★★★★★</div>
+        <p class="quote">„Endlich jemand, der nicht in Versicherungsdeutsch redet. Super sympathisch und ehrlich."</p>
+        <div class="person">
+          <div class="person-avatar">SW</div>
+          <div><div class="person-name">Sarah W.</div><div class="person-meta">22 Jahre</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANZAHL: Aktualisieren -->
+    <p class="proof-count reveal">Bereits <strong>500+ Checkups</strong> durchgeführt.</p>
+
   </div>
+</section>
 
-  <!-- ======================================================
-       PAGE 7 — FAQ
-  ====================================================== -->
-  <div class="page" id="page-7">
-    <div class="page-inner">
+<!-- ======================================================
+     SECTION 6 — BERATER
+====================================================== -->
+<section class="section" id="sec-berater">
+  <div class="section-inner">
 
+    <div style="text-align:center; margin-bottom:20px;" class="reveal">
+      <div class="section-tag">Dein Ansprechpartner</div>
+      <h2>Wer sitzt am anderen Ende des Video-Calls?</h2>
+    </div>
+
+    <div class="berater-layout reveal">
+      <!-- BERATER-FOTO: <img src="foto.jpg" style="width:100%;height:100%;object-fit:cover;"> -->
+      <div class="berater-photo" aria-label="Foto Berater">👤</div>
+
+      <!-- NAME & TEXT: Anpassen -->
+      <div>
+        <h3 style="font-size:1.2rem; margin-bottom:8px;">[Vorname Nachname]</h3>
+        <p class="berater-text">
+          Ich und mein Team beraten seit <strong>[X] Jahren</strong> Menschen, die genau da stehen, wo du jetzt stehst. Online, auf Augenhöhe – ohne Versicherungs-Fachchinesisch.
+        </p>
+        <!-- PERSÖNLICHE NOTE: Anpassen -->
+        <p class="berater-text" style="margin-top:8px;">[Persönliche Note: z.B. lokaler Bezug, Motivation, kurze persönliche Geschichte]</p>
+      </div>
+
+      <div class="berater-note" style="width:100%;">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12A19.79 19.79 0 0 1 1.61 3.42 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.56a16 16 0 0 0 6.53 6.53l.87-.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        Kein Callcenter, keine Anonymität – du weißt, mit wem du sprichst.
+        <!-- VIDEO: <video src="video.mp4" width="100%" controls muted playsinline style="border-radius:10px;margin-top:12px;"></video> -->
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ======================================================
+     SECTION 7 — FAQ
+====================================================== -->
+<section class="section" id="sec-faq">
+  <div class="section-inner">
+
+    <div class="reveal">
       <div class="section-tag">FAQ</div>
       <h2>Deine Fragen – unsere Antworten</h2>
-
-      <div class="faq-list" style="margin-top:20px;">
-        <div class="faq-item">
-          <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">
-            Ist das wirklich kostenlos?
-            <span class="faq-toggle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
-          </button>
-          <div class="faq-body"><div class="faq-body-inner">Ja, komplett. Der Checkup ist ein Service unserer Beratung. Keine Kosten, keine Verpflichtungen.</div></div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">
-            Wird mir dann was verkauft?
-            <span class="faq-toggle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
-          </button>
-          <div class="faq-body"><div class="faq-body-inner">Wir geben dir einen ehrlichen Überblick. Wenn du gut aufgestellt bist, sagen wir dir das. Wenn Handlungsbedarf besteht, zeigen wir Optionen – ohne Druck.</div></div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">
-            Ich hab gar keine Ahnung von Versicherungen – ist das schlimm?
-            <span class="faq-toggle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
-          </button>
-          <div class="faq-body"><div class="faq-body-inner">Perfekt, dafür gibt es uns. Wir erklären alles so, dass du es wirklich verstehst.</div></div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">
-            Wie läuft das ab?
-            <span class="faq-toggle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
-          </button>
-          <div class="faq-body"><div class="faq-body-inner">Du buchst einen Termin, wir treffen uns per Video (ca. 30 Min.). Wir gehen gemeinsam durch, was du hast und was du brauchst.</div></div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">
-            Brauche ich Unterlagen?
-            <span class="faq-toggle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
-          </button>
-          <div class="faq-body"><div class="faq-body-inner">Nein. Wenn du deinen Versicherungsordner zur Hand hast – umso besser. Aber kein Muss.</div></div>
-        </div>
-      </div>
-
-      <div class="cta-stack">
-        <button class="btn" onclick="nextPage()" aria-label="Zum Termin buchen">
-          Alles klar – jetzt Termin buchen
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </button>
-        <button class="btn-back" onclick="prevPage()" aria-label="Zurück">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-          Zurück
-        </button>
-      </div>
-
     </div>
-  </div>
 
-  <!-- ======================================================
-       PAGE 8 — FINALER CTA + CALENDLY
-  ====================================================== -->
-  <div class="page" id="page-8">
-    <div class="page-inner">
-      <div style="text-align:center;">
-        <div class="section-tag">Fast geschafft 🎉</div>
-        <h2>Wähle deinen Wunschtermin</h2>
-        <p class="sub-text">Dauert nur 30 Sekunden. Kostenlos & unverbindlich.</p>
-        <!-- URGENCY: Slots anpassen -->
-        <div class="urgency">⏱ Diese Woche noch 5 freie Termine</div>
+    <div class="faq-list reveal" style="margin-top:20px;">
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">
+          Ist das wirklich kostenlos?
+          <span class="faq-toggle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        </button>
+        <div class="faq-body"><div class="faq-body-inner">Ja, komplett. Der Checkup ist ein Service unserer Beratung. Keine Kosten, keine Verpflichtungen.</div></div>
       </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">
+          Wird mir dann was verkauft?
+          <span class="faq-toggle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        </button>
+        <div class="faq-body"><div class="faq-body-inner">Wir geben dir einen ehrlichen Überblick. Wenn du gut aufgestellt bist, sagen wir dir das. Wenn Handlungsbedarf besteht, zeigen wir Optionen – ohne Druck.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">
+          Ich hab gar keine Ahnung von Versicherungen – ist das schlimm?
+          <span class="faq-toggle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        </button>
+        <div class="faq-body"><div class="faq-body-inner">Perfekt, dafür gibt es uns. Wir erklären alles so, dass du es wirklich verstehst.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">
+          Wie läuft das ab?
+          <span class="faq-toggle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        </button>
+        <div class="faq-body"><div class="faq-body-inner">Du buchst einen Termin, wir treffen uns per Video (ca. 30 Min.). Wir gehen gemeinsam durch, was du hast und was du brauchst.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false" onclick="toggleFaq(this)">
+          Brauche ich Unterlagen?
+          <span class="faq-toggle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        </button>
+        <div class="faq-body"><div class="faq-body-inner">Nein. Wenn du deinen Versicherungsordner zur Hand hast – umso besser. Aber kein Muss.</div></div>
+      </div>
+    </div>
 
+  </div>
+</section>
+
+<!-- ======================================================
+     SECTION 8 — FINALER CTA + CALENDLY (Buchung)
+====================================================== -->
+<section class="section" id="sec-booking" style="scroll-margin-top: 59px;">
+  <div class="section-inner">
+    <div style="text-align:center;" class="reveal">
+      <div class="section-tag">Fast geschafft 🎉</div>
+      <h2>Wähle deinen Wunschtermin</h2>
+      <p class="sub-text">Dauert nur 30 Sekunden. Kostenlos & unverbindlich.</p>
+      <!-- URGENCY: Slots anpassen -->
+      <div class="urgency">⏱ Diese Woche noch 5 freie Termine</div>
+    </div>
+
+    <!--
+      CALENDLY INLINE WIDGET:
+      1. Aktiviere das Calendly-Script unten (Kommentar entfernen)
+      2. Ersetze 'DEIN-CALENDLY-LINK' mit deiner echten URL
+         z.B. https://calendly.com/dein-name/checkup?primary_color=006B3F&hide_gdpr_banner=1
+      3. Stelle das "Scheduled"-Event in Calendly als Meta Pixel Custom Conversion ein
+    -->
+    <div class="calendly-wrap reveal">
       <!--
-        CALENDLY INLINE WIDGET:
-        1. Aktiviere das Calendly-Script unten (Kommentar entfernen)
-        2. Ersetze 'DEIN-CALENDLY-LINK' mit deiner echten URL
-           z.B. https://calendly.com/dein-name/checkup?primary_color=006B3F&hide_gdpr_banner=1
-        3. Stelle das "Scheduled"-Event in Calendly als Meta Pixel Custom Conversion ein
+      <div class="calendly-inline-widget"
+           data-url="https://calendly.com/DEIN-CALENDLY-LINK?primary_color=006B3F&hide_gdpr_banner=1"
+           style="min-width:320px;height:580px;">
+      </div>
       -->
-      <div class="calendly-wrap">
-        <!--
-        <div class="calendly-inline-widget"
-             data-url="https://calendly.com/DEIN-CALENDLY-LINK?primary_color=006B3F&hide_gdpr_banner=1"
-             style="min-width:320px;height:580px;">
-        </div>
-        -->
-        <div class="calendly-placeholder">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          <strong>Calendly-Widget hier einbetten</strong>
-          <span>Den Platzhalter-Kommentar oben aktivieren<br>und DEIN-CALENDLY-LINK ersetzen</span>
-        </div>
-      </div>
-
-      <div class="final-badges" style="margin-top:16px;">
-        <span class="final-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>30 Minuten</span>
-        <span class="final-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Online</span>
-        <span class="final-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>100% kostenlos</span>
-        <span class="final-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Kein Verkaufsdruck</span>
-      </div>
-
-      <div style="text-align:center; margin-top:16px;">
-        <button class="btn-back" onclick="prevPage()" aria-label="Zurück" style="margin:0 auto;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-          Zurück
-        </button>
-      </div>
-
-      <!-- DEVK-LOGO: <img src="devk-logo.svg" alt="DEVK" height="20" style="display:block;margin:20px auto 0;opacity:0.5;"> -->
-      <!-- IMPRESSUM/DATENSCHUTZ: Links eintragen -->
-      <div style="text-align:center; margin-top:24px; font-size:0.76rem; color:var(--text-sub);">
-        <a href="/impressum" style="color:var(--text-sub); margin:0 8px;">Impressum</a>
-        <a href="/datenschutz" style="color:var(--text-sub); margin:0 8px;">Datenschutz</a>
+      <div class="calendly-placeholder">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <strong>Calendly-Widget hier einbetten</strong>
+        <span>Den Platzhalter-Kommentar oben aktivieren<br>und DEIN-CALENDLY-LINK ersetzen</span>
       </div>
     </div>
+
+    <div class="final-badges reveal" style="margin-top:16px;">
+      <span class="final-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>30 Minuten</span>
+      <span class="final-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Online</span>
+      <span class="final-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>100% kostenlos</span>
+      <span class="final-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Kein Verkaufsdruck</span>
+    </div>
+
+    <!-- DEVK-LOGO: <img src="devk-logo.svg" alt="DEVK" height="20" style="display:block;margin:28px auto 0;opacity:0.5;"> -->
+    <!-- IMPRESSUM/DATENSCHUTZ: Links eintragen -->
+    <div style="text-align:center; margin-top:32px; font-size:0.76rem; color:var(--text-sub);">
+      <a href="/impressum" style="color:var(--text-sub); margin:0 8px;">Impressum</a>
+      <a href="/datenschutz" style="color:var(--text-sub); margin:0 8px;">Datenschutz</a>
+    </div>
   </div>
+</section>
 
-</div><!-- /pages -->
-
-<!-- Sticky Mobile CTA (erscheint ab Seite 2) -->
-<button id="sticky-cta" onclick="goToPage(8)" aria-label="Termin buchen">
+<!-- Sticky Mobile CTA -->
+<button id="sticky-cta" onclick="scrollToBooking()" aria-label="Termin buchen">
   Termin buchen – kostenlos →
 </button>
 
@@ -1129,127 +1014,56 @@
 
 <script>
   /* ============================================================
-     STATE
+     SMOOTH SCROLL TO BOOKING
   ============================================================ */
-  const TOTAL_PAGES = 8;
-  let currentPage = 1;
-
-  /* ============================================================
-     INIT
-  ============================================================ */
-  function init() {
-    buildNavSteps();
-    updateNav();
+  function scrollToBooking() {
+    document.getElementById('sec-booking').scrollIntoView({ behavior: 'smooth' });
   }
 
   /* ============================================================
-     BUILD NAV STEP DOTS
+     SCROLL PROGRESS BAR
   ============================================================ */
-  function buildNavSteps() {
-    const container = document.getElementById('nav-steps');
-    container.innerHTML = '';
-    for (let i = 1; i <= TOTAL_PAGES; i++) {
-      const d = document.createElement('div');
-      d.className = 'nav-step' + (i === 1 ? ' active' : '');
-      d.id = 'nav-step-' + i;
-      d.setAttribute('aria-label', 'Schritt ' + i + ' von ' + TOTAL_PAGES);
-      container.appendChild(d);
-    }
-  }
-
-  /* ============================================================
-     NAVIGATE FORWARD
-  ============================================================ */
-  function nextPage() {
-    if (currentPage >= TOTAL_PAGES) return;
-    goToPage(currentPage + 1);
-  }
-
-  /* ============================================================
-     NAVIGATE BACK
-  ============================================================ */
-  function prevPage() {
-    if (currentPage <= 1) return;
-    goToPage(currentPage - 1, true);
-  }
-
-  /* ============================================================
-     GO TO SPECIFIC PAGE
-  ============================================================ */
-  function goToPage(target, isBack = false) {
-    if (target === currentPage || target < 1 || target > TOTAL_PAGES) return;
-
-    const leaving  = document.getElementById('page-' + currentPage);
-    const entering = document.getElementById('page-' + target);
-
-    entering.scrollTop = 0;
-
-    // 1. Position entering page instantly (no transition yet)
-    entering.classList.remove('animating', 'active', 'enter-from-right', 'enter-from-left', 'exit-to-left', 'exit-to-right');
-    entering.classList.add(isBack ? 'enter-from-left' : 'enter-from-right');
-
-    // 2. Force browser to register the starting position
-    entering.getBoundingClientRect();
-
-    // 3. Now enable transitions on both
-    leaving.classList.add('animating');
-    entering.classList.add('animating');
-
-    // 4. Trigger animations
-    entering.classList.remove('enter-from-right', 'enter-from-left');
-    entering.classList.add('active');
-
-    leaving.classList.remove('active');
-    leaving.classList.add(isBack ? 'exit-to-right' : 'exit-to-left');
-
-    // 5. Cleanup after animation
-    setTimeout(() => {
-      leaving.classList.remove('animating', 'exit-to-left', 'exit-to-right');
-      entering.classList.remove('animating');
-    }, 450);
-
-    currentPage = target;
-    updateNav();
-
-    /* META PIXEL: Schritt-Event */
-    /* if (typeof fbq !== 'undefined') fbq('trackCustom', 'FunnelStep', { step: currentPage }); */
-  }
-
-  /* ============================================================
-     UPDATE NAV UI
-  ============================================================ */
-  function updateNav() {
-    /* Progress bar */
-    const pct = (currentPage / TOTAL_PAGES) * 100;
+  function updateProgressBar() {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
     document.getElementById('progress-bar').style.width = pct + '%';
+  }
 
-    /* Step dots */
-    for (let i = 1; i <= TOTAL_PAGES; i++) {
-      const dot = document.getElementById('nav-step-' + i);
-      dot.className = 'nav-step';
-      if (i < currentPage)  dot.classList.add('done');
-      if (i === currentPage) dot.classList.add('active');
-    }
-
-    /* Back button */
-    const backBtn = document.getElementById('nav-back');
-    if (currentPage === 1) {
-      backBtn.classList.add('hidden');
-    } else {
-      backBtn.classList.remove('hidden');
-    }
-
-    /* Sticky mobile CTA: hide on page 1 and 8 */
+  /* ============================================================
+     STICKY MOBILE CTA
+     Zeigt sich nach dem Hero, verschwindet bei der Buchungssektion
+  ============================================================ */
+  function updateStickyCta() {
     const sticky = document.getElementById('sticky-cta');
-    if (currentPage === 1 || currentPage === 8) {
-      sticky.classList.remove('show');
+    const heroBottom = document.getElementById('sec-hero').getBoundingClientRect().bottom;
+    const bookingTop = document.getElementById('sec-booking').getBoundingClientRect().top;
+
+    if (heroBottom < 0 && bookingTop > window.innerHeight * 0.5) {
+      sticky.classList.add('show');
     } else {
-      setTimeout(() => sticky.classList.add('show'), 600);
+      sticky.classList.remove('show');
     }
   }
 
   /* ============================================================
-     PAIN POINT TOGGLE (Page 2)
+     SCROLL REVEAL
+  ============================================================ */
+  function initReveal() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  }
+
+  /* ============================================================
+     PAIN POINT TOGGLE
   ============================================================ */
   function togglePain(card) {
     card.classList.toggle('selected');
@@ -1293,7 +1107,12 @@
   /* ============================================================
      INIT
   ============================================================ */
-  init();
+  window.addEventListener('scroll', () => {
+    updateProgressBar();
+    updateStickyCta();
+  }, { passive: true });
+
+  initReveal();
 </script>
 </body>
 </html>
